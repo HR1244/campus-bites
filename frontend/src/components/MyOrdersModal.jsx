@@ -5,7 +5,11 @@ export default function MyOrdersModal({ isOpen, onClose, orders = [], currentUse
   if (!isOpen || !currentUser) return null;
 
   const userOrders = orders
-    .filter(o => o.userEmail === currentUser.email || o.userPhone === currentUser.phone)
+    .filter(o => {
+      const email = o.user_email ?? o.userEmail;
+      const phone = o.phone ?? o.userPhone;
+      return email === currentUser.email || phone === currentUser.phone;
+    })
     .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
   const getStepProgress = (status) => {
@@ -62,7 +66,7 @@ export default function MyOrdersModal({ isOpen, onClose, orders = [], currentUse
                   </div>
 
                   <ul className="order-card-items">
-                    {order.items.map((item, idx) => (
+                    {(typeof order.items === 'string' ? JSON.parse(order.items) : order.items).map((item, idx) => (
                       <li className="order-card-item-row" key={idx}>
                         <span className="order-card-item-name">
                           <span className="order-card-item-qty">{item.qty}x</span>

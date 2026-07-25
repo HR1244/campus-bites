@@ -35,13 +35,31 @@ export default function Footer() {
         <div className="footer-bottom">
           <p>© 2025 Campus Bites, SPNREC Araria. All rights reserved. Made with love for students.</p>
         </div>
+
+
+        {/* .........................Developer Credit Section......................... */}
+
         <div className="footer-bottom">
           <p>Website design &amp; built by</p>
-          <a href="https://www.instagram.com/direct/inbox/?hl=en" target="_blank" rel="noreferrer" className="developer-link">
-            <strong>Ritesh Kumar</strong>
-            <span className="developer-subtitle"> | Software Engineer | Web Developer</span>
+          <a href="https://www.linkedin.com/in/ritesh-kumar-825063340/" target="_blank" rel="noreferrer" className="developer-link">
+            <strong>Ritesh Kumar </strong>
+            <span className="developer-subtitle"> (Front-End Developer) | </span>
+          </a>
+        
+
+        
+          <a href="#" target="_blank" rel="noreferrer" className="developer-link">
+            <strong>  Harsh Raj </strong>
+            <span className="developer-subtitle"> (Back-End Developer) | </span>
+          </a>
+        
+          <a href="https://www.linkedin.com/in/rashtra-bhushan-694314299/" target="_blank" rel="noreferrer" className="developer-link">
+            <strong>  Rashtra Bhushan </strong>
+            <span className="developer-subtitle"> (Animation &amp; Design) </span>
           </a>
         </div>
+        
+        
       </div>
     </footer>
   );

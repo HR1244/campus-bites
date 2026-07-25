@@ -15,7 +15,7 @@ export default function ReviewsModal({
 
   if (!isOpen) return null;
 
-  const productReviews = reviews.filter(r => r.productId === productId);
+  const productReviews = reviews.filter(r => (r.item_id ?? r.productId) === productId);
   const totalReviews = productReviews.length;
   
   const avgRating = totalReviews > 0
@@ -83,7 +83,7 @@ export default function ReviewsModal({
               productReviews.map((rev, index) => (
                 <div className="review-item" key={index}>
                   <div className="review-header">
-                    <span className="review-user-name">{rev.userName}</span>
+                    <span className="review-user-name">{rev.user_name ?? rev.userName}</span>
                     <span className="review-stars">{renderStars(rev.rating)}</span>
                   </div>
                   <p className="review-comment">{rev.comment}</p>

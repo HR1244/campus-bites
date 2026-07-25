@@ -15,7 +15,7 @@ export default function MenuCard({
   reviews = [],
   onOpenReviews
 }) {
-  const productReviews = reviews.filter(r => r.productId === item.id);
+  const productReviews = reviews.filter(r => (r.item_id ?? r.productId) === item.id);
   const totalReviews = productReviews.length;
   const avgRating = totalReviews > 0
     ? (productReviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews).toFixed(1)

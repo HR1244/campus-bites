@@ -125,7 +125,7 @@ export default function ContactSection({ formSuccess, onSubmit }) {
               <div>
                 <strong>Phone / Call Canteen</strong>
                 <p>
-                  <a href="tel:+919631899999" className="contact-link">+91 96318 99999</a> &nbsp;|&nbsp; <a href="tel:+919800000000" className="contact-link">+91 98000 00000</a>
+                  <a href="tel:+919631899999" className="contact-link">+91 1234567890</a> &nbsp;|&nbsp; <a href="tel:+919800000000" className="contact-link">+91 98000 00000</a>
                 </p>
               </div>
             </div>

@@ -36,11 +36,13 @@ export default function AdminDashboardModal({
 
   const filteredOrders = orders.filter(order => {
     const matchesFilter = orderFilter === 'All' || (order.status || 'Pending').toLowerCase() === orderFilter.toLowerCase();
-    const idStr = order.id.slice(-6).toUpperCase();
+    const idStr = String(order.id).slice(-6).toUpperCase();
+    const userName = order.user_name ?? order.userName ?? '';
+    const userPhone = order.phone ?? order.userPhone ?? '';
     const matchesSearch = 
       idStr.includes(orderSearch.toUpperCase()) || 
-      order.userName.toLowerCase().includes(orderSearch.toLowerCase()) ||
-      (order.userPhone && order.userPhone.includes(orderSearch));
+      userName.toLowerCase().includes(orderSearch.toLowerCase()) ||
+      userPhone.includes(orderSearch);
     return matchesFilter && matchesSearch;
   });
 
@@ -282,9 +284,9 @@ export default function AdminDashboardModal({
                                 <span className="admin-order-id-label">
                                   #{order.id.slice(-6).toUpperCase()}
                                 </span>
-                                <span className="admin-order-user-badge">{order.userName}</span>
+                                <span className="admin-order-user-badge">{order.user_name ?? order.userName}</span>
                                 <span className="admin-order-timestamp">
-                                  {new Date(order.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                  {new Date(order.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </span>
                               </div>
                               
@@ -309,7 +311,7 @@ export default function AdminDashboardModal({
                                     </tr>
                                   </thead>
                                   <tbody>
-                                    {order.items.map((item, idx) => (
+                                    {(typeof order.items === 'string' ? JSON.parse(order.items) : order.items).map((item, idx) => (
                                       <tr key={idx}>
                                         <td>
                                           <div style={{ fontWeight: 600 }}>{item.name}</div>
@@ -343,7 +345,7 @@ export default function AdminDashboardModal({
                                   </div>
                                   <div className="admin-detail-block">
                                     <span>Customer Contact</span>
-                                    <span>{order.userPhone || 'N/A'}</span>
+                                    <span>{order.phone ?? order.userPhone ?? 'N/A'}</span>
                                   </div>
                                 </div>
 

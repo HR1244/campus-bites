@@ -1338,6 +1338,12 @@ body  {
   .hero-food-strip { display: none; }
   .contact-form { padding: 24px; }
   .order-modal { padding: 32px 24px; }
+  .nav-container { padding: 0 12px; gap: 8px; }
+  .nav-actions { gap: 6px; }
+  .theme-toggle { width: 36px; height: 36px; }
+  .cart-btn { padding: 8px 12px; }
+  .logo-sub { display: none; } /* Hide subtitle on very small screens to save space */
+  .logo-text { font-size: 16px; }
 }
 
 

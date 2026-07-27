@@ -1,3 +1,4 @@
+import { API_URL } from '../config.js';
 import React, { useState } from 'react';
 
 export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
@@ -22,7 +23,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
       return;
     }
 
-    fetch('http://localhost:8000/auth/login', {
+    fetch(API_URL + '/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: emailOrPhone, password })
@@ -64,7 +65,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
       return;
     }
 
-    fetch('http://localhost:8000/auth/register', {
+    fetch(API_URL + '/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: regName, email: regEmail, password: regPassword })

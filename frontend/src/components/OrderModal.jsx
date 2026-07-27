@@ -1,3 +1,4 @@
+import { API_URL } from '../config.js';
 import React, { useState, useEffect, useRef } from 'react';
 import { formatPrice } from '../data/menuData.js';
 
@@ -68,7 +69,7 @@ export default function OrderModal({ isOpen, onClose, cart = [], onConfirm, curr
     if (timerRef.current) clearInterval(timerRef.current);
     
     try {
-      const res = await fetch('http://localhost:8000/api/create-payment-order', {
+      const res = await fetch(API_URL + '/api/create-payment-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount: totalAmt })
@@ -90,7 +91,7 @@ export default function OrderModal({ isOpen, onClose, cart = [], onConfirm, curr
         },
         handler: async function (response) {
           try {
-            const verifyRes = await fetch('http://localhost:8000/api/verify-payment', {
+            const verifyRes = await fetch(API_URL + '/api/verify-payment', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({

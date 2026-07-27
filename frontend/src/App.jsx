@@ -1,3 +1,4 @@
+import { API_URL } from './config.js';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Navbar from './components/Navbar.jsx';
 import Hero from './components/Hero.jsx';
@@ -31,7 +32,7 @@ export default function App() {
   const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/menu')
+    fetch(API_URL + '/api/menu')
       .then(res => res.json())
       .then(data => setMenuItems(data.length ? data : MENU_ITEMS))
       .catch(err => {
@@ -39,12 +40,12 @@ export default function App() {
         setMenuItems(MENU_ITEMS);
       });
     
-    fetch('http://localhost:8000/api/orders')
+    fetch(API_URL + '/api/orders')
       .then(res => res.json())
       .then(setOrders)
       .catch(console.error);
       
-    fetch('http://localhost:8000/api/reviews')
+    fetch(API_URL + '/api/reviews')
       .then(res => res.json())
       .then(setReviews)
       .catch(console.error);
@@ -286,7 +287,7 @@ export default function App() {
       user_id: currentUser ? currentUser.id : null
     };
     
-    fetch('http://localhost:8000/api/orders', {
+    fetch(API_URL + '/api/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(fullOrder)
@@ -300,7 +301,7 @@ export default function App() {
   };
 
   const handleCancelOrder = (orderId) => {
-    fetch(`http://localhost:8000/api/orders/${orderId}/status?status=Cancelled`, { method: 'PUT' })
+    fetch(`${API_URL}/api/orders/${orderId}/status?status=Cancelled`, { method: 'PUT' })
       .then(res => res.json())
       .then(() => {
         setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: 'Cancelled' } : o));
@@ -310,7 +311,7 @@ export default function App() {
   };
 
   const handleUpdateOrderStatus = (orderId, newStatus) => {
-    fetch(`http://localhost:8000/api/orders/${orderId}/status?status=${newStatus}`, { method: 'PUT' })
+    fetch(`${API_URL}/api/orders/${orderId}/status?status=${newStatus}`, { method: 'PUT' })
       .then(res => res.json())
       .then(() => {
         setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
@@ -328,7 +329,7 @@ export default function App() {
       comment
     };
     
-    fetch('http://localhost:8000/api/reviews', {
+    fetch(API_URL + '/api/reviews', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newReview)
@@ -390,7 +391,7 @@ export default function App() {
   const handleSaveProduct = (productData) => {
     const exists = menuItems.some(item => item.id === productData.id);
     const method = exists ? 'PUT' : 'POST';
-    const url = exists ? `http://localhost:8000/api/menu/${productData.id}` : 'http://localhost:8000/api/menu';
+    const url = exists ? `${API_URL}/api/menu/${productData.id}` : API_URL + '/api/menu';
     
     fetch(url, {
       method,
@@ -418,7 +419,7 @@ export default function App() {
 
   const handleDeleteProduct = (productId) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
-      fetch(`http://localhost:8000/api/menu/${productId}`, { method: 'DELETE' })
+      fetch(`${API_URL}/api/menu/${productId}`, { method: 'DELETE' })
         .then(res => res.json())
         .then(() => {
           const foundItem = menuItems.find(item => item.id === productId);

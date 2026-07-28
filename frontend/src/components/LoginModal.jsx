@@ -10,6 +10,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
   const [regPhone, setRegPhone] = useState('');
   const [regPassword, setRegPassword] = useState('');
   const [regConfirmPassword, setRegConfirmPassword] = useState('');
+  const [forgotEmail, setForgotEmail] = useState('');
   const [error, setError] = useState('');
 
   if (!isOpen) return null;
@@ -77,6 +78,26 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
       .then(user => {
         onLoginSuccess({ id: user.id, name: user.name, email: user.email, role: user.role });
         onClose();
+      })
+      .catch(err => setError(err.message));
+  };
+
+  const handleForgotPasswordSubmit = (e) => {
+    e.preventDefault();
+    setError('');
+
+    fetch(API_URL + '/auth/forgot-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: forgotEmail })
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to send reset link');
+        return res.json();
+      })
+      .then(() => {
+        setError('Password reset link sent to your email.');
+        setForgotEmail('');
       })
       .catch(err => setError(err.message));
   };
@@ -199,13 +220,15 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
         )}
 
         {tab === 'forgot-password' && (
-          <form onSubmit={e => { e.preventDefault(); setError('Password reset link sent (simulated).'); }} className="auth-form">
+          <form onSubmit={handleForgotPasswordSubmit} className="auth-form">
             <h3 style={{ marginBottom: '15px', fontSize: '18px' }}>Reset Password</h3>
             <div className="auth-form-group">
               <label>Email Address</label>
               <input 
                 type="email" 
                 placeholder="Enter your registered email" 
+                value={forgotEmail}
+                onChange={e => setForgotEmail(e.target.value)}
                 required
               />
             </div>
@@ -214,7 +237,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
               type="button" 
               className="btn btn-ghost full-width" 
               style={{ marginTop: '10px' }}
-              onClick={() => { setTab('login'); setError(''); }}
+              onClick={() => { setTab('login'); setError(''); setForgotEmail(''); }}
             >
               Back to Login
             </button>

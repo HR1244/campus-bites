@@ -11,6 +11,8 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     password = Column(String)
     role = Column(String, default="user") # 'admin' or 'user'
+    reset_token = Column(String, index=True, nullable=True)
+    reset_token_expiry = Column(DateTime, nullable=True)
 
 class MenuItem(Base):
     __tablename__ = "menu_items"

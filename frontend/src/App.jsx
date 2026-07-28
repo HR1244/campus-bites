@@ -16,6 +16,7 @@ import AdminProductModal from './components/AdminProductModal.jsx';
 import AdminDashboardModal from './components/AdminDashboardModal.jsx';
 import MyOrdersModal from './components/MyOrdersModal.jsx';
 import ReviewsModal from './components/ReviewsModal.jsx';
+import ResetPasswordModal from './components/ResetPasswordModal.jsx';
 import { MENU_ITEMS, ITEM_VARIANTS, FEATURED } from './data/menuData.js';
 
 let toastIdCounter = 0;
@@ -25,6 +26,12 @@ export default function App() {
     const saved = localStorage.getItem('cb-current-user');
     return saved ? JSON.parse(saved) : null;
   });
+
+  const [resetToken, setResetToken] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('resetToken') || null;
+  });
+  const [resetModalOpen, setResetModalOpen] = useState(!!resetToken);
 
   const [menuItems, setMenuItems] = useState([]);
   const [itemVariants, setItemVariants] = useState(ITEM_VARIANTS);
@@ -573,6 +580,17 @@ export default function App() {
         reviews={reviews}
         currentUser={currentUser}
         onSubmitReview={handleSubmitReview}
+        onLoginClick={() => setIsLoginModalOpen(true)}
+      />
+
+      <ResetPasswordModal 
+        isOpen={resetModalOpen}
+        token={resetToken}
+        onClose={() => {
+          setResetModalOpen(false);
+          const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+          window.history.pushState({path:newUrl},'',newUrl);
+        }}
         onLoginClick={() => setIsLoginModalOpen(true)}
       />
     </>

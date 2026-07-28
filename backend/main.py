@@ -4,11 +4,23 @@ from sqlalchemy.orm import Session
 from typing import List
 import bcrypt
 import razorpay
+import os
 
 import models, schemas
 from database import engine, get_db
 
 models.Base.metadata.create_all(bind=engine)
+
+from sqlalchemy import text
+def run_migrations():
+    with engine.connect() as conn:
+        try:
+            conn.execute(text("ALTER TABLE users ADD COLUMN reset_token VARCHAR"))
+            conn.execute(text("ALTER TABLE users ADD COLUMN reset_token_expiry TIMESTAMP"))
+            conn.commit()
+        except Exception:
+            pass # columns already exist or not supported (e.g. SQLite already has them from create_all if it was recreated)
+run_migrations()
 
 app = FastAPI()
 
@@ -53,10 +65,87 @@ def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Invalid email or password")
     return db_user
 
+@app.post("/auth/forgot-password")
+def forgot_password(req: schemas.ForgotPasswordRequest, db: Session = Depends(get_db)):
+    db_user = db.query(models.User).filter(models.User.email == req.email).first()
+    if not db_user:
+        # Don't reveal if email exists or not for security, just return success
+        return {"message": "If the email is registered, a reset link will be sent."}
+    
+    import secrets
+    from datetime import datetime, timedelta
+    
+    token = secrets.token_urlsafe(32)
+    db_user.reset_token = token
+    db_user.reset_token_expiry = datetime.utcnow() + timedelta(hours=1)
+    db.commit()
+    
+    reset_link = f"https://campus-bites.vercel.app?resetToken={token}"
+    
+    # Try sending email
+    smtp_email = os.environ.get("SMTP_EMAIL")
+    smtp_password = os.environ.get("SMTP_PASSWORD")
+    
+    if smtp_email and smtp_password:
+        import smtplib
+        from email.mime.text import MIMEText
+        from email.mime.multipart import MIMEMultipart
+        
+        msg = MIMEMultipart()
+        msg['From'] = f"Campus Bites <{smtp_email}>"
+        msg['To'] = db_user.email
+        msg['Subject'] = "Password Reset Request"
+        
+        body = f"""Hello {db_user.name},
+
+You recently requested to reset your password for your Campus Bites account.
+
+Click the link below to reset it:
+{reset_link}
+
+If you did not request a password reset, please ignore this email or reply to let us know. This password reset is only valid for the next 60 minutes.
+
+Thanks,
+Campus Bites Team"""
+        msg.attach(MIMEText(body, 'plain'))
+        
+        try:
+            server = smtplib.SMTP('smtp.gmail.com', 587)
+            server.starttls()
+            server.login(smtp_email, smtp_password)
+            server.send_message(msg)
+            server.quit()
+        except Exception as e:
+            print("Failed to send email:", str(e))
+    else:
+        # Fallback for development if SMTP is not configured
+        print(f"\n--- PASSWORD RESET LINK (dev mode) ---\n{reset_link}\n--------------------------------------\n")
+        
+    return {"message": "If the email is registered, a reset link will be sent."}
+
+@app.post("/auth/reset-password")
+def reset_password(req: schemas.ResetPasswordRequest, db: Session = Depends(get_db)):
+    from datetime import datetime
+    
+    db_user = db.query(models.User).filter(
+        models.User.reset_token == req.token,
+        models.User.reset_token_expiry > datetime.utcnow()
+    ).first()
+    
+    if not db_user:
+        raise HTTPException(status_code=400, detail="Invalid or expired reset token")
+        
+    db_user.password = get_password_hash(req.new_password)
+    db_user.reset_token = None
+    db_user.reset_token_expiry = None
+    db.commit()
+    
+    return {"message": "Password updated successfully"}
+
 # --- MENU ITEMS ---
 @app.get("/api/menu", response_model=List[schemas.MenuItemResponse])
 def get_menu(db: Session = Depends(get_db)):
-    return db.query(models.MenuItem).all()
+    return db.query(models.MenuItem).order_by(models.MenuItem.id.asc()).all()
 
 @app.post("/api/menu", response_model=schemas.MenuItemResponse)
 def create_menu_item(item: schemas.MenuItemCreate, db: Session = Depends(get_db)):
@@ -119,8 +208,8 @@ def get_reviews(db: Session = Depends(get_db)):
     return db.query(models.Review).order_by(models.Review.date.desc()).all()
 
 # --- RAZORPAY ---
-RAZORPAY_KEY_ID = "rzp_test_TFl0tKSbKXpskR"
-RAZORPAY_KEY_SECRET = "2RZOShXQeVO7xOD0DGWGlh3k"
+RAZORPAY_KEY_ID = os.environ.get("RAZORPAY_KEY_ID", "rzp_test_TFl0tKSbKXpskR")
+RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET", "2RZOShXQeVO7xOD0DGWGlh3k")
 razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 
 @app.post("/api/create-payment-order")

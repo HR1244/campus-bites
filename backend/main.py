@@ -80,42 +80,41 @@ def forgot_password(req: schemas.ForgotPasswordRequest, db: Session = Depends(ge
     db_user.reset_token_expiry = datetime.utcnow() + timedelta(minutes=15)
     db.commit()
     
-    # Try sending email
-    smtp_email = os.environ.get("SMTP_EMAIL")
-    smtp_password = os.environ.get("SMTP_PASSWORD")
+    # Try sending email via Brevo
+    brevo_api_key = os.environ.get("BREVO_API_KEY")
     
-    if smtp_email and smtp_password:
-        import smtplib
-        from email.mime.text import MIMEText
-        from email.mime.multipart import MIMEMultipart
+    if brevo_api_key:
+        import urllib.request
+        import json
         
-        msg = MIMEMultipart()
-        msg['From'] = f"Campus Bites <{smtp_email}>"
-        msg['To'] = db_user.email
-        msg['Subject'] = "Password Reset OTP"
+        url = "https://api.brevo.com/v3/smtp/email"
+        headers = {
+            "accept": "application/json",
+            "api-key": brevo_api_key,
+            "content-type": "application/json"
+        }
         
-        body = f"""Hello {db_user.name},
+        body = f"""<p>Hello {db_user.name},</p>
+<p>You recently requested to reset your password for your Campus Bites account.</p>
+<p>Your password reset OTP is: <strong>{otp}</strong></p>
+<p>If you did not request a password reset, please ignore this email. This OTP is only valid for the next 15 minutes.</p>
+<p>Thanks,<br>Campus Bites Team</p>"""
 
-You recently requested to reset your password for your Campus Bites account.
-
-Your password reset OTP is: {otp}
-
-If you did not request a password reset, please ignore this email. This OTP is only valid for the next 15 minutes.
-
-Thanks,
-Campus Bites Team"""
-        msg.attach(MIMEText(body, 'plain'))
+        data = {
+            "sender": {"name": "Campus Bites", "email": "no-reply@campusbites.com"},
+            "to": [{"email": db_user.email, "name": db_user.name}],
+            "subject": "Password Reset OTP",
+            "htmlContent": body
+        }
         
         try:
-            server = smtplib.SMTP('smtp.gmail.com', 587)
-            server.starttls()
-            server.login(smtp_email, smtp_password)
-            server.send_message(msg)
-            server.quit()
+            req_obj = urllib.request.Request(url, data=json.dumps(data).encode('utf-8'), headers=headers, method='POST')
+            with urllib.request.urlopen(req_obj) as response:
+                pass # success
         except Exception as e:
-            print("Failed to send email:", str(e))
+            print("Failed to send email via Brevo:", str(e))
     else:
-        # Fallback for development if SMTP is not configured
+        # Fallback for development if API key is not configured
         print(f"\n--- PASSWORD RESET OTP (dev mode) ---\n{otp}\n--------------------------------------\n")
         
     return {"message": "If the email is registered, an OTP will be sent."}

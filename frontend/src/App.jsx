@@ -283,9 +283,11 @@ export default function App() {
       user_email: currentUser ? currentUser.email : '',
       phone: currentUser ? currentUser.phone : '',
       hostel: orderData.hostel || '',
-      room: orderData.room || '',
+      room: orderData.roomNumber || '',
+      orderType: orderData.orderType || 'pickup',
+      paymentMethod: orderData.paymentMethod || 'cash',
       items: JSON.stringify(orderData.items || []),
-      total: orderData.total || 0,
+      total: orderData.totalPrice || 0,
       status: 'Pending',
       user_id: currentUser ? currentUser.id : null
     };

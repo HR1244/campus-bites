@@ -25,6 +25,18 @@ def run_migrations():
             conn.commit()
         except Exception:
             pass
+            
+        try:
+            conn.execute(text("ALTER TABLE orders ADD COLUMN \"orderType\" VARCHAR"))
+            conn.commit()
+        except Exception:
+            pass
+
+        try:
+            conn.execute(text("ALTER TABLE orders ADD COLUMN \"paymentMethod\" VARCHAR"))
+            conn.commit()
+        except Exception:
+            pass
 run_migrations()
 
 app = FastAPI()

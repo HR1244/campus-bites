@@ -56,6 +56,8 @@ class Order(Base):
     total = Column(Float)
     status = Column(String, default="Pending") # Pending, Completed, Cancelled
     date = Column(DateTime, default=datetime.utcnow)
+    orderType = Column(String)
+    paymentMethod = Column(String)
 
 class Review(Base):
     __tablename__ = "reviews"

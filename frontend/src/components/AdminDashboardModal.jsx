@@ -336,7 +336,7 @@ export default function AdminDashboardModal({
                                   {order.orderType === 'delivery' && (
                                     <div className="admin-detail-block">
                                       <span>Delivery Destination</span>
-                                      <span>{order.hostel} - Room {order.roomNumber}</span>
+                                      <span>{order.hostel} - Room {order.room}</span>
                                     </div>
                                   )}
                                   <div className="admin-detail-block">

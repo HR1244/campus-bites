@@ -78,7 +78,7 @@ export default function OrderModal({ isOpen, onClose, cart = [], onConfirm, curr
       const data = await res.json();
 
       const options = {
-        key: 'rzp_test_TFl0tKSbKXpskR',
+        key: 'rzp_test_TK2G1bjEM1kNUm',
         amount: totalAmt * 100,
         currency: 'INR',
         name: 'Campus Bites',

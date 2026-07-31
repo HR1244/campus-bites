@@ -211,8 +211,8 @@ def get_reviews(db: Session = Depends(get_db)):
     return db.query(models.Review).order_by(models.Review.date.desc()).all()
 
 # --- RAZORPAY ---
-RAZORPAY_KEY_ID = os.environ.get("RAZORPAY_KEY_ID", "rzp_test_TFl0tKSbKXpskR")
-RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET", "2RZOShXQeVO7xOD0DGWGlh3k")
+RAZORPAY_KEY_ID = os.environ.get("RAZORPAY_KEY_ID", "rzp_test_TK2G1bjEM1kNUm")
+RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET", "mMZqJNh94EpsIewsHq84S4f5")
 razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 
 @app.post("/api/create-payment-order")

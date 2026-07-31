@@ -278,10 +278,10 @@ export default function App() {
 
   const handleConfirmCheckout = (orderData) => {
     const fullOrder = {
-      id: orderData.id,
-      user_name: currentUser ? currentUser.name : 'Guest',
-      user_email: currentUser ? currentUser.email : '',
-      phone: currentUser ? currentUser.phone : '',
+      id: orderData.id || `CB-${Math.floor(100000 + Math.random() * 900000)}`,
+      user_name: (currentUser && currentUser.name) ? currentUser.name : 'Guest',
+      user_email: (currentUser && currentUser.email) ? currentUser.email : '',
+      phone: (currentUser && currentUser.phone) ? currentUser.phone : '',
       hostel: orderData.hostel || '',
       room: orderData.roomNumber || '',
       orderType: orderData.orderType || 'pickup',
@@ -289,7 +289,7 @@ export default function App() {
       items: JSON.stringify(orderData.items || []),
       total: orderData.totalPrice || 0,
       status: 'Pending',
-      user_id: currentUser ? currentUser.id : null
+      user_id: (currentUser && currentUser.id) ? currentUser.id : null
     };
     
     fetch(API_URL + '/api/orders', {
@@ -297,12 +297,22 @@ export default function App() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(fullOrder)
     })
-      .then(res => res.json())
-      .then(data => {
-        setOrders(prev => [data, ...prev]);
-        setCart([]);
+      .then(async (res) => {
+        if (!res.ok) {
+          const err = await res.text();
+          throw new Error('Failed to place order: ' + err);
+        }
+        return res.json();
       })
-      .catch(console.error);
+      .then(savedOrder => {
+        setOrders(prev => [savedOrder, ...prev]);
+        setCart([]);
+        showToast("Order Placed Successfully!");
+      })
+      .catch(err => {
+        console.error("Order submission error:", err);
+        showToast("Failed to place order!", '', 'error');
+      });
   };
 
   const handleCancelOrder = (orderId) => {

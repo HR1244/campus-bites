@@ -80,40 +80,42 @@ def forgot_password(req: schemas.ForgotPasswordRequest, db: Session = Depends(ge
     db_user.reset_token_expiry = datetime.utcnow() + timedelta(minutes=15)
     db.commit()
     
-    # Try sending email via Resend
-    resend_api_key = os.environ.get("RESEND_API_KEY")
+    # Try sending email
+    smtp_email = os.environ.get("SMTP_EMAIL")
+    smtp_password = os.environ.get("SMTP_PASSWORD")
     
-    if resend_api_key:
-        import urllib.request
-        import json
+    if smtp_email and smtp_password:
+        import smtplib
+        from email.mime.text import MIMEText
+        from email.mime.multipart import MIMEMultipart
         
-        url = "https://api.resend.com/emails"
-        headers = {
-            "Authorization": f"Bearer {resend_api_key}",
-            "Content-Type": "application/json"
-        }
+        msg = MIMEMultipart()
+        msg['From'] = f"Campus Bites <{smtp_email}>"
+        msg['To'] = db_user.email
+        msg['Subject'] = "Password Reset OTP"
         
-        body = f"""<p>Hello {db_user.name},</p>
-<p>You recently requested to reset your password for your Campus Bites account.</p>
-<p>Your password reset OTP is: <strong>{otp}</strong></p>
-<p>If you did not request a password reset, please ignore this email. This OTP is only valid for the next 15 minutes.</p>
-<p>Thanks,<br>Campus Bites Team</p>"""
+        body = f"""Hello {db_user.name},
 
-        data = {
-            "from": "Campus Bites <onboarding@resend.dev>",
-            "to": [db_user.email],
-            "subject": "Password Reset OTP",
-            "html": body
-        }
+You recently requested to reset your password for your Campus Bites account.
+
+Your password reset OTP is: {otp}
+
+If you did not request a password reset, please ignore this email. This OTP is only valid for the next 15 minutes.
+
+Thanks,
+Campus Bites Team"""
+        msg.attach(MIMEText(body, 'plain'))
         
         try:
-            req_obj = urllib.request.Request(url, data=json.dumps(data).encode('utf-8'), headers=headers, method='POST')
-            with urllib.request.urlopen(req_obj) as response:
-                pass # success
+            server = smtplib.SMTP('smtp.gmail.com', 587)
+            server.starttls()
+            server.login(smtp_email, smtp_password)
+            server.send_message(msg)
+            server.quit()
         except Exception as e:
-            print("Failed to send email via Resend:", str(e))
+            print("Failed to send email:", str(e))
     else:
-        # Fallback for development if API key is not configured
+        # Fallback for development if SMTP is not configured
         print(f"\n--- PASSWORD RESET OTP (dev mode) ---\n{otp}\n--------------------------------------\n")
         
     return {"message": "If the email is registered, an OTP will be sent."}

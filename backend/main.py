@@ -16,10 +16,15 @@ def run_migrations():
     with engine.connect() as conn:
         try:
             conn.execute(text("ALTER TABLE users ADD COLUMN reset_token VARCHAR"))
+            conn.commit()
+        except Exception:
+            pass
+            
+        try:
             conn.execute(text("ALTER TABLE users ADD COLUMN reset_token_expiry TIMESTAMP"))
             conn.commit()
         except Exception:
-            pass # columns already exist or not supported (e.g. SQLite already has them from create_all if it was recreated)
+            pass
 run_migrations()
 
 app = FastAPI()

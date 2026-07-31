@@ -80,18 +80,17 @@ def forgot_password(req: schemas.ForgotPasswordRequest, db: Session = Depends(ge
     db_user.reset_token_expiry = datetime.utcnow() + timedelta(minutes=15)
     db.commit()
     
-    # Try sending email via Brevo
-    brevo_api_key = os.environ.get("BREVO_API_KEY")
+    # Try sending email via Resend
+    resend_api_key = os.environ.get("RESEND_API_KEY")
     
-    if brevo_api_key:
+    if resend_api_key:
         import urllib.request
         import json
         
-        url = "https://api.brevo.com/v3/smtp/email"
+        url = "https://api.resend.com/emails"
         headers = {
-            "accept": "application/json",
-            "api-key": brevo_api_key,
-            "content-type": "application/json"
+            "Authorization": f"Bearer {resend_api_key}",
+            "Content-Type": "application/json"
         }
         
         body = f"""<p>Hello {db_user.name},</p>
@@ -101,10 +100,10 @@ def forgot_password(req: schemas.ForgotPasswordRequest, db: Session = Depends(ge
 <p>Thanks,<br>Campus Bites Team</p>"""
 
         data = {
-            "sender": {"name": "Campus Bites", "email": "no-reply@campusbites.com"},
-            "to": [{"email": db_user.email, "name": db_user.name}],
+            "from": "Campus Bites <onboarding@resend.dev>",
+            "to": [db_user.email],
             "subject": "Password Reset OTP",
-            "htmlContent": body
+            "html": body
         }
         
         try:
@@ -112,7 +111,7 @@ def forgot_password(req: schemas.ForgotPasswordRequest, db: Session = Depends(ge
             with urllib.request.urlopen(req_obj) as response:
                 pass # success
         except Exception as e:
-            print("Failed to send email via Brevo:", str(e))
+            print("Failed to send email via Resend:", str(e))
     else:
         # Fallback for development if API key is not configured
         print(f"\n--- PASSWORD RESET OTP (dev mode) ---\n{otp}\n--------------------------------------\n")

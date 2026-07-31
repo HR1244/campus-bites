@@ -1,7 +1,7 @@
 import { API_URL } from '../config.js';
 import React, { useState } from 'react';
 
-export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
+export default function LoginModal({ isOpen, onClose, onLoginSuccess, onForgotPasswordSuccess }) {
   const [tab, setTab] = useState('login');
   const [emailOrPhone, setEmailOrPhone] = useState('');
   const [password, setPassword] = useState('');
@@ -96,8 +96,10 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
         return res.json();
       })
       .then(() => {
-        setError('Password reset link sent to your email.');
         setForgotEmail('');
+        if (onForgotPasswordSuccess) {
+          onForgotPasswordSuccess();
+        }
       })
       .catch(err => setError(err.message));
   };

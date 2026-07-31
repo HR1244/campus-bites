@@ -27,11 +27,7 @@ export default function App() {
     return saved ? JSON.parse(saved) : null;
   });
 
-  const [resetToken, setResetToken] = useState(() => {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('resetToken') || null;
-  });
-  const [resetModalOpen, setResetModalOpen] = useState(!!resetToken);
+  const [resetModalOpen, setResetModalOpen] = useState(false);
 
   const [menuItems, setMenuItems] = useState([]);
   const [itemVariants, setItemVariants] = useState(ITEM_VARIANTS);
@@ -543,6 +539,10 @@ export default function App() {
         isOpen={isLoginModalOpen}
         onClose={() => { setIsLoginModalOpen(false); setPendingOrder(false); }}
         onLoginSuccess={handleLoginSuccess}
+        onForgotPasswordSuccess={() => {
+          setIsLoginModalOpen(false);
+          setResetModalOpen(true);
+        }}
       />
 
       <AdminProductModal
@@ -585,12 +585,7 @@ export default function App() {
 
       <ResetPasswordModal 
         isOpen={resetModalOpen}
-        token={resetToken}
-        onClose={() => {
-          setResetModalOpen(false);
-          const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-          window.history.pushState({path:newUrl},'',newUrl);
-        }}
+        onClose={() => setResetModalOpen(false)}
         onLoginClick={() => setIsLoginModalOpen(true)}
       />
     </>

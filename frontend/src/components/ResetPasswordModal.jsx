@@ -1,7 +1,8 @@
 import { API_URL } from '../config.js';
 import React, { useState } from 'react';
 
-export default function ResetPasswordModal({ isOpen, token, onClose, onLoginClick }) {
+export default function ResetPasswordModal({ isOpen, onClose, onLoginClick }) {
+  const [otp, setOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
@@ -26,10 +27,10 @@ export default function ResetPasswordModal({ isOpen, token, onClose, onLoginClic
     fetch(API_URL + '/auth/reset-password', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token, new_password: newPassword })
+      body: JSON.stringify({ token: otp, new_password: newPassword })
     })
       .then(res => {
-        if (!res.ok) throw new Error('Invalid or expired reset link. Please request a new one.');
+        if (!res.ok) throw new Error('Invalid or expired OTP. Please try again.');
         return res.json();
       })
       .then(() => {
@@ -64,6 +65,20 @@ export default function ResetPasswordModal({ isOpen, token, onClose, onLoginClic
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="auth-form">
+            <p style={{ textAlign: 'center', color: 'var(--text-muted)', marginBottom: '15px', fontSize: '14px' }}>
+              Check your email for the 6-digit OTP.
+            </p>
+            <div className="auth-form-group">
+              <label>6-Digit OTP</label>
+              <input 
+                type="text" 
+                placeholder="Enter OTP" 
+                value={otp}
+                onChange={e => setOtp(e.target.value)}
+                maxLength={6}
+                required
+              />
+            </div>
             <div className="auth-form-group">
               <label>New Password</label>
               <input 

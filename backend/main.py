@@ -13,28 +13,17 @@ models.Base.metadata.create_all(bind=engine)
 
 from sqlalchemy import text
 def run_migrations():
-    with engine.connect() as conn:
+    migrations = [
+        "ALTER TABLE users ADD COLUMN reset_token VARCHAR",
+        "ALTER TABLE users ADD COLUMN reset_token_expiry TIMESTAMP",
+        "ALTER TABLE orders ADD COLUMN \"orderType\" VARCHAR",
+        "ALTER TABLE orders ADD COLUMN \"paymentMethod\" VARCHAR"
+    ]
+    for m in migrations:
         try:
-            conn.execute(text("ALTER TABLE users ADD COLUMN reset_token VARCHAR"))
-            conn.commit()
-        except Exception:
-            pass
-            
-        try:
-            conn.execute(text("ALTER TABLE users ADD COLUMN reset_token_expiry TIMESTAMP"))
-            conn.commit()
-        except Exception:
-            pass
-            
-        try:
-            conn.execute(text("ALTER TABLE orders ADD COLUMN \"orderType\" VARCHAR"))
-            conn.commit()
-        except Exception:
-            pass
-
-        try:
-            conn.execute(text("ALTER TABLE orders ADD COLUMN \"paymentMethod\" VARCHAR"))
-            conn.commit()
+            with engine.connect() as conn:
+                conn.execute(text(m))
+                conn.commit()
         except Exception:
             pass
 run_migrations()

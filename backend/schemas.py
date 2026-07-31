@@ -68,8 +68,8 @@ class OrderBase(BaseModel):
     phone: str
     hostel: str
     room: str
-    orderType: str
-    paymentMethod: str
+    orderType: Optional[str] = None
+    paymentMethod: Optional[str] = None
     items: str # JSON string of cart items
     total: float
     status: str = "Pending"

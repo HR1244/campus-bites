@@ -77,10 +77,12 @@ export default function Navbar({
             <span className="theme-icon" id="themeIcon">{theme === 'dark' ? '☀️' : '🌙'}</span>
           </button>
 
-          <button className="cart-btn" id="cartBtn" aria-label="Open cart" onClick={onCartClick}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
-            <span className={`cart-badge${bump ? ' bump' : ''}`} id="cartBadge">{cartCount}</span>
-          </button>
+          {!(currentUser && currentUser.role === 'admin') && (
+            <button className="cart-btn" id="cartBtn" aria-label="Open cart" onClick={onCartClick}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+              <span className={`cart-badge${bump ? ' bump' : ''}`} id="cartBadge">{cartCount}</span>
+            </button>
+          )}
 
           {currentUser ? (
             <div className="user-profile-wrapper">

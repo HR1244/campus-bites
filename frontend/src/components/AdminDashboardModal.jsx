@@ -34,6 +34,27 @@ export default function AdminDashboardModal({
     p.category.toLowerCase().includes(productSearch.toLowerCase())
   );
 
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+  const handleDownloadXerox = async (orderId) => {
+    try {
+      const res = await fetch(`${API_URL}/api/orders/${orderId}/xerox`);
+      if (!res.ok) throw new Error('File not found on server');
+      const data = await res.json();
+      
+      if (data.file_data) {
+        const link = document.createElement('a');
+        link.href = data.file_data;
+        link.download = data.file_name || 'document.pdf';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch (err) {
+      alert("Error downloading file: " + err.message);
+    }
+  };
+
   const filteredOrders = orders.filter(order => {
     const matchesFilter = orderFilter === 'All' || (order.status || 'Pending').toLowerCase() === orderFilter.toLowerCase();
     const idStr = String(order.id).slice(-6).toUpperCase();
@@ -319,6 +340,14 @@ export default function AdminDashboardModal({
                                             <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
                                               Config: {item.description}
                                             </div>
+                                          )}
+                                          {item.isXerox && (
+                                            <button 
+                                              onClick={(e) => { e.stopPropagation(); handleDownloadXerox(order.id); }}
+                                              style={{ marginTop: '4px', fontSize: '11px', padding: '2px 8px', background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                                            >
+                                              📥 Download File
+                                            </button>
                                           )}
                                         </td>
                                         <td style={{ textAlign: 'center', fontWeight: 700 }}>{item.qty}</td>

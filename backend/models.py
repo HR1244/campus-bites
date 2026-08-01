@@ -68,3 +68,10 @@ class Review(Base):
     rating = Column(Integer)
     comment = Column(Text)
     date = Column(DateTime, default=datetime.utcnow)
+
+class XeroxFile(Base):
+    __tablename__ = "xerox_files"
+    id = Column(Integer, primary_key=True, index=True)
+    order_id = Column(String, index=True)
+    file_name = Column(String)
+    file_data = Column(Text) # Base64 string

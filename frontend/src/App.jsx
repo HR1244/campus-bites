@@ -82,6 +82,32 @@ export default function App() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isAdminProductModalOpen, setIsAdminProductModalOpen] = useState(false);
   const [isAdminDashboardOpen, setIsAdminDashboardOpen] = useState(false);
+  
+  // Real-time Order Polling for Admin Dashboard
+  useEffect(() => {
+    if (!isAdminDashboardOpen) return;
+    
+    const fetchOrders = () => {
+      fetch(API_URL + '/api/orders')
+        .then(res => res.json())
+        .then(newOrders => {
+          setOrders(prev => {
+            // Check if there are new orders by comparing lengths (or you can compare latest ID)
+            if (newOrders.length > prev.length) {
+              showToast("New Order Received!", '', 'info');
+              // Play a notification sound (optional, if you have one, or just rely on toast)
+            }
+            return newOrders;
+          });
+        })
+        .catch(console.error);
+    };
+
+    // Poll every 10 seconds
+    const intervalId = setInterval(fetchOrders, 10000);
+    return () => clearInterval(intervalId);
+  }, [isAdminDashboardOpen]);
+
   const [editingProduct, setEditingProduct] = useState(null);
   const [pendingOrder, setPendingOrder] = useState(false);
   const [isMyOrdersOpen, setIsMyOrdersOpen] = useState(false);
@@ -456,6 +482,8 @@ export default function App() {
     setIsAdminProductModalOpen(true);
   };
 
+  const isAdmin = currentUser && currentUser.role === 'admin';
+
   return (
     <>
       <Navbar
@@ -493,7 +521,7 @@ export default function App() {
         onAddToCart={addToCart}
         onChangeQty={changeCartQty}
         onOpenVariantDrawer={openVariantDrawer}
-        isAdmin={currentUser && currentUser.role === 'admin'}
+        isAdmin={isAdmin}
         onEdit={handleEditProductClick}
         onDelete={handleDeleteProduct}
         reviews={reviews}
@@ -504,7 +532,7 @@ export default function App() {
         }}
       />
 
-      <XeroxSection onAddCustomItem={addCustomItemToCart} />
+      {!isAdmin && <XeroxSection onAddCustomItem={addCustomItemToCart} />}
       <AboutSection />
 
       <ContactSection

@@ -7,6 +7,7 @@ export default function XeroxSection({ onAddCustomItem }) {
   const [pages, setPages] = useState(1);
   const [copies, setCopies] = useState(1);
   const [fileName, setFileName] = useState('');
+  const [fileData, setFileData] = useState(null);
   const fileInputRef = useRef(null);
 
   const getPageRate = () => {
@@ -28,7 +29,11 @@ export default function XeroxSection({ onAddCustomItem }) {
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
-      setFileName(e.target.files[0].name);
+      const file = e.target.files[0];
+      setFileName(file.name);
+      const reader = new FileReader();
+      reader.onload = (event) => setFileData(event.target.result);
+      reader.readAsDataURL(file);
     }
   };
 
@@ -43,7 +48,11 @@ export default function XeroxSection({ onAddCustomItem }) {
   const handleDrop = (e) => {
     e.preventDefault();
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setFileName(e.dataTransfer.files[0].name);
+      const file = e.dataTransfer.files[0];
+      setFileName(file.name);
+      const reader = new FileReader();
+      reader.onload = (event) => setFileData(event.target.result);
+      reader.readAsDataURL(file);
     }
   };
 
@@ -62,6 +71,7 @@ export default function XeroxSection({ onAddCustomItem }) {
       isXerox: true,
       xeroxDetails: {
         fileName: finalFileName,
+        fileData: fileData,
         printType,
         doubleSided,
         paperSize,
@@ -72,8 +82,8 @@ export default function XeroxSection({ onAddCustomItem }) {
 
     onAddCustomItem(customItem);
     
-    
     setFileName('');
+    setFileData(null);
     setPages(1);
     setCopies(1);
   };

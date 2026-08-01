@@ -192,11 +192,51 @@ def get_orders(db: Session = Depends(get_db)):
 
 @app.post("/api/orders", response_model=schemas.OrderResponse)
 def create_order(order: schemas.OrderCreate, db: Session = Depends(get_db)):
+    import json
+    
+    # Parse items to check for Xerox file uploads
+    try:
+        items = json.loads(order.items)
+        has_xerox_files = False
+        
+        for item in items:
+            if item.get("isXerox") and "xeroxDetails" in item:
+                file_data = item["xeroxDetails"].pop("fileData", None)
+                if file_data:
+                    has_xerox_files = True
+                    # Save the base64 data to the XeroxFile table
+                    xerox_db = models.XeroxFile(
+                        order_id=order.id,
+                        file_name=item["xeroxDetails"].get("fileName", "document.pdf"),
+                        file_data=file_data
+                    )
+                    db.add(xerox_db)
+                    
+        # If we modified the items (removed the heavy base64 data), re-serialize
+        if has_xerox_files:
+            order.items = json.dumps(items)
+            
+    except Exception as e:
+        print("Error parsing order items for xerox files:", e)
+
     db_order = models.Order(**order.model_dump())
     db.add(db_order)
     db.commit()
     db.refresh(db_order)
     return db_order
+
+@app.get("/api/orders/{order_id}/xerox")
+def get_xerox_file(order_id: str, db: Session = Depends(get_db)):
+    from fastapi.responses import JSONResponse
+    xerox_file = db.query(models.XeroxFile).filter(models.XeroxFile.order_id == order_id).first()
+    if not xerox_file:
+        raise HTTPException(status_code=404, detail="Xerox file not found for this order")
+    
+    # Return as JSON to be handled by frontend (download)
+    return JSONResponse(content={
+        "file_name": xerox_file.file_name,
+        "file_data": xerox_file.file_data
+    })
 
 @app.put("/api/orders/{order_id}/status", response_model=schemas.OrderResponse)
 def update_order_status(order_id: str, status: str, db: Session = Depends(get_db)):

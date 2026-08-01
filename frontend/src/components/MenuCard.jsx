@@ -88,19 +88,21 @@ export default function MenuCard({
               </div>
 
               <div className="menu-footer-bottom-row">
-                <div className="menu-card-add-action" id={`action-wrapper-${item.id}`}>
-                  {qtyInCart > 0 ? (
-                    <div className="drawer-qty-selector" style={{ margin: '0 auto', width: '100%' }}>
-                      <button className="drawer-qty-btn" onClick={() => onChangeQty(activeVar.id, -1)}>−</button>
-                      <span className="drawer-qty-num">{qtyInCart}</span>
-                      <button className="drawer-qty-btn" onClick={() => onChangeQty(activeVar.id, 1)}>+</button>
-                    </div>
-                  ) : (
-                    <button className="add-to-cart-btn" style={{ width: '100%' }} onClick={() => onAddToCart(activeVar.id)}>
-                      Add to Cart
-                    </button>
-                  )}
-                </div>
+                {!isAdmin && (
+                  <div className="menu-card-add-action" id={`action-wrapper-${item.id}`}>
+                    {qtyInCart > 0 ? (
+                      <div className="drawer-qty-selector" style={{ margin: '0 auto', width: '100%' }}>
+                        <button className="drawer-qty-btn" onClick={() => onChangeQty(activeVar.id, -1)}>−</button>
+                        <span className="drawer-qty-num">{qtyInCart}</span>
+                        <button className="drawer-qty-btn" onClick={() => onChangeQty(activeVar.id, 1)}>+</button>
+                      </div>
+                    ) : (
+                      <button className="add-to-cart-btn" style={{ width: '100%' }} onClick={() => onAddToCart(activeVar.id)}>
+                        Add to Cart
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -137,8 +139,7 @@ export default function MenuCard({
                 Change
               </button>
             </div>
-
-            <div className="menu-footer-bottom-row">
+            {!isAdmin && (
               <div className="menu-card-add-action" id={`action-wrapper-${item.id}`}>
                 {qtyInCart > 0 ? (
                   <div className="drawer-qty-selector" style={{ margin: '0 auto', width: '100%' }}>
@@ -152,7 +153,7 @@ export default function MenuCard({
                   </button>
                 )}
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
@@ -178,7 +179,7 @@ export default function MenuCard({
         <div className="menu-desc">{item.desc}</div>
         <div className="menu-footer">
           <div className="menu-price">{formatPrice(item.price)}</div>
-          {isCanteenOnly ? (
+          {isAdmin ? null : isCanteenOnly ? (
             <span className="visit-canteen-badge">🏪 Visit Canteen</span>
           ) : qtyInCart > 0 ? (
             <div className="drawer-qty-selector" style={{ minWidth: '82px' }}>
@@ -187,7 +188,9 @@ export default function MenuCard({
               <button className="drawer-qty-btn" onClick={() => onChangeQty(item.id, 1)}>+</button>
             </div>
           ) : (
-            <button className="add-to-cart-btn" id={`atc-${item.id}`} onClick={() => onAddToCart(item.id)}>+ Add</button>
+            <button className="add-to-cart-btn" onClick={() => onAddToCart(item.id)}>
+              Add to Cart
+            </button>
           )}
         </div>
       </div>
